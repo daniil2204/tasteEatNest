@@ -5,9 +5,10 @@ import { DishController } from './dish/dish.controller';
 import { DishService } from './dish/dish.service';
 import { DishModule } from './dish/dish.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
-  imports: [DishModule, PrismaModule],
+  imports: [DishModule, PrismaModule, ImagesModule],
   controllers: [AppController, DishController],
   providers: [AppService, DishService],
 })
