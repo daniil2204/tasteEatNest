@@ -1,5 +1,5 @@
 import { DishType } from '@prisma/client';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import {
   IsArray,
   IsString,
@@ -7,9 +7,16 @@ import {
   IsEnum,
   IsPositive,
   IsNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 
-export class DishCreateRequetDTO {
+export class ImageDTO {
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+}
+
+export class DishCreateRequestDTO {
   @IsString()
   @IsNotEmpty()
   title: string;
@@ -28,6 +35,10 @@ export class DishCreateRequetDTO {
   @IsNotEmpty()
   @IsString({ each: true })
   ingredients: string[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageDTO)
+  images: ImageDTO[];
 }
 
 export class DishCreateResponceDTO {

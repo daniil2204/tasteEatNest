@@ -3,9 +3,10 @@ import { DishController } from './dish.controller';
 import { DishService } from './dish.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ImagesModule } from 'src/images/images.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, ImagesModule],
   controllers: [DishController],
   providers: [
     DishService,

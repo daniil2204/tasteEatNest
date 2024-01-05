@@ -1,5 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,6 +21,16 @@ model Dish {
   likes       Int      @default(0)
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt
+  images      Image[]
+}
+
+model Image {
+  id         Int      @id @default(autoincrement())
+  url        String   @unique
+  created_at DateTime @default(now())
+  update_at  DateTime @updatedAt
+  dish       Dish     @relation(fields: [dishId], references: [id])
+  dishId     Int
 }
 
 enum DishType {

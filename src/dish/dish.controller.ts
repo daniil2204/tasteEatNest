@@ -9,7 +9,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { DishService } from './dish.service';
-import { DishCreateRequetDTO } from './dto/dish.dto';
+import { DishCreateRequestDTO } from './dto/dish.dto';
 
 @Controller('dish')
 export class DishController {
@@ -23,7 +23,7 @@ export class DishController {
     return this.dishService.getDishById(id);
   }
   @Post()
-  createDish(@Body() createDishData: DishCreateRequetDTO) {
+  createDish(@Body() createDishData: DishCreateRequestDTO) {
     return this.dishService.createDish(createDishData);
   }
   @Put('/:id')
