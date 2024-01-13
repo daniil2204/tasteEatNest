@@ -49,6 +49,7 @@ export class DishCreateResponceDTO {
   price: number;
   weight: number;
   ingredients: string[];
+  images: ImageDTO[];
   @Exclude()
   likes: number;
   @Exclude()

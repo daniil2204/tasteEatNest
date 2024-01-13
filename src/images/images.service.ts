@@ -13,9 +13,7 @@ export class ImagesService {
     return urls;
   }
   async getImageByName(imageName: string) {
-    //const imagePath = path.join(process.cwd(), 'uploads/dishes/' + imageName);
     const isExist = await this.checkIsExist(`uploads/dishes/${imageName}`);
-    console.log(isExist);
     return isExist.found ? isExist.imgPath : 'NotFound';
   }
   async checkIsExist(imgName: string): Promise<ImgFoundType> {

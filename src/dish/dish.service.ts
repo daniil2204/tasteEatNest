@@ -10,9 +10,34 @@ export class DishService {
     private readonly prismaService: PrismaService,
     private readonly imagesService: ImagesService,
   ) {}
-  async getDishes() {
-    const dishes = await this.prismaService.dish.findMany({});
-    return dishes;
+  async getDishes(offset: number) {
+    const dishes = await this.prismaService.dish.findMany({
+      skip: offset,
+      take: 4,
+      select: {
+        id: true,
+        description: true,
+        ingredients: true,
+        price: true,
+        title: true,
+        type: true,
+        weight: true,
+        images: {
+          select: {
+            url: true,
+          },
+        },
+      },
+    });
+    return dishes.map((dish) => {
+      const fetchDish = {
+        ...dish,
+        images: dish.images.map((img) => ({
+          url: `${process.env.DOMAIN}${img.url}`,
+        })),
+      };
+      return new DishCreateResponceDTO(fetchDish);
+    });
   }
   async getDishById(id: number) {
     const dish = await this.prismaService.dish.findUnique({
@@ -32,26 +57,34 @@ export class DishService {
         message: 'Images are not valid or exists',
       };
     }
-    const dish = await this.prismaService.dish.create({
-      data: {
-        description,
-        ingredients,
-        price,
-        title,
-        type,
-        weight,
-      },
-    });
-    const dishImages = validsImgs.map((image) => {
+    try {
+      const dish = await this.prismaService.dish.create({
+        data: {
+          description,
+          ingredients,
+          price,
+          title,
+          type,
+          weight,
+        },
+      });
+      const dishImages = validsImgs.map((image) => {
+        return {
+          ...image,
+          dishId: dish.id,
+        };
+      });
+      console.log(dishImages);
+      await this.prismaService.image.createMany({
+        data: dishImages,
+      });
+      return new DishCreateResponceDTO(dish);
+    } catch (err) {
       return {
-        ...image,
-        dishId: dish.id,
+        status: 400,
+        message: 'Title or Images were used',
       };
-    });
-    await this.prismaService.image.createMany({
-      data: dishImages,
-    });
-    return new DishCreateResponceDTO(dish);
+    }
   }
   private async imagesIsValidAndExist(images: imageType[]) {
     const validRes = {
@@ -70,8 +103,9 @@ export class DishService {
         validRes.isValid = false;
         break;
       }
-      validRes.validsImgs.push({ url: imgPath });
+      validRes.validsImgs.push({ url: `images${imgPath}` });
     }
+    console.log(validRes.validsImgs);
     return validRes;
   }
 }

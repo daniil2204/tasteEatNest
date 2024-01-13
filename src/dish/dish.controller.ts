@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Body,
+  Query,
 } from '@nestjs/common';
 import { DishService } from './dish.service';
 import { DishCreateRequestDTO } from './dto/dish.dto';
@@ -15,8 +16,8 @@ import { DishCreateRequestDTO } from './dto/dish.dto';
 export class DishController {
   constructor(private readonly dishService: DishService) {}
   @Get()
-  getDishes() {
-    return this.dishService.getDishes();
+  getDishes(@Query('offset') offset?: number) {
+    return this.dishService.getDishes(offset ? +offset : 0);
   }
   @Get('/:id')
   getDishById(@Param('id', ParseIntPipe) id: number) {

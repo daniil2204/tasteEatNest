@@ -13,6 +13,10 @@ async function bootstrap() {
       },
     }),
   );
-  await app.listen(3000);
+  app.enableCors({
+    credentials: true,
+    origin: ['http://localhost:3000'],
+  });
+  await app.listen(4000);
 }
 bootstrap();
