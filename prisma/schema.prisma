@@ -22,18 +22,51 @@ model Dish {
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt
   images      Image[]
+  discount    Int      @default(0)
+  bucket      Bucket[]
 }
 
 model Image {
-  id         Int      @id @default(autoincrement())
-  url        String   @unique
-  created_at DateTime @default(now())
-  update_at  DateTime @updatedAt
-  dish       Dish     @relation(fields: [dishId], references: [id])
-  dishId     Int
+  id        Int      @id @default(autoincrement())
+  url       String   @unique
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  dish      Dish     @relation(fields: [dishId], references: [id])
+  dishId    Int
 }
 
 enum DishType {
   BREAKFAST
   DINNER
+  DRINK
+  DESSERT
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String
+  userSalt  String
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  type      UserType
+  bucket    Bucket[]
+}
+
+enum UserType {
+  ADMIN
+  BUYER
+  MODERATOR
+}
+
+model Bucket {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  dish   Dish @relation(fields: [dishId], references: [id])
+  dishId Int
+  count  Int
+  price  Int
 }

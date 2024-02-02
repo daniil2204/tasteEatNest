@@ -1,8 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { createDishInterface, imageType } from 'types/dish';
-import { DishCreateResponceDTO } from './dto/dish.dto';
+import {
+  createDishInterface,
+  imageType,
+  updateDishInterface,
+} from 'types/dish';
+import { DishCreateResponceDTO, DishByTypeResponceDTO } from './dto/dish.dto';
 import { ImagesService } from 'src/images/images.service';
+import { getDishesInterface } from 'types/dish';
+import { ValidsImg } from 'types/images';
 
 @Injectable()
 export class DishService {
@@ -10,14 +16,25 @@ export class DishService {
     private readonly prismaService: PrismaService,
     private readonly imagesService: ImagesService,
   ) {}
-  async getDishes(offset: number) {
+  async getDishes({
+    offset,
+    orderByQuery,
+    take,
+    type,
+    discount,
+  }: getDishesInterface) {
     const dishes = await this.prismaService.dish.findMany({
+      where: {
+        type: type,
+      },
       skip: offset,
-      take: 4,
+      take: take,
+      orderBy: orderByQuery,
       select: {
         id: true,
         description: true,
         ingredients: true,
+        discount: true,
         price: true,
         title: true,
         type: true,
@@ -32,11 +49,19 @@ export class DishService {
     return dishes.map((dish) => {
       const fetchDish = {
         ...dish,
-        images: dish.images.map((img) => ({
-          url: `${process.env.DOMAIN}${img.url}`,
-        })),
+        ...(type || discount
+          ? {
+              image: `${process.env.DOMAIN}${dish.images[0].url}`,
+            }
+          : {
+              images: dish.images.map((img) => ({
+                url: `${process.env.DOMAIN}${img.url}`,
+              })),
+            }),
       };
-      return new DishCreateResponceDTO(fetchDish);
+      return type || discount
+        ? new DishByTypeResponceDTO(fetchDish)
+        : new DishCreateResponceDTO(fetchDish);
     });
   }
   async getDishById(id: number) {
@@ -45,18 +70,12 @@ export class DishService {
         id,
       },
     });
-    return dish;
+    return new DishCreateResponceDTO(dish);
   }
   async createDish(createDishData: createDishInterface) {
     const { description, ingredients, price, title, type, weight, images } =
       createDishData;
-    const { isValid, validsImgs } = await this.imagesIsValidAndExist(images);
-    if (!isValid) {
-      return {
-        status: 400,
-        message: 'Images are not valid or exists',
-      };
-    }
+    const { validsImgs } = await this.imagesIsValidAndExist(images);
     try {
       const dish = await this.prismaService.dish.create({
         data: {
@@ -68,23 +87,31 @@ export class DishService {
           weight,
         },
       });
-      const dishImages = validsImgs.map((image) => {
-        return {
-          ...image,
-          dishId: dish.id,
-        };
-      });
-      console.log(dishImages);
-      await this.prismaService.image.createMany({
-        data: dishImages,
-      });
+      this.createImages(validsImgs, dish.id);
       return new DishCreateResponceDTO(dish);
     } catch (err) {
-      return {
-        status: 400,
-        message: 'Title or Images were used',
-      };
+      throw new BadRequestException('Title or Images were used');
     }
+  }
+  async updateDishById(id: number, updateDishByIdData: updateDishInterface) {
+    const dish = await this.prismaService.dish.update({
+      where: {
+        id,
+      },
+      data: { ...updateDishByIdData },
+    });
+    if (updateDishByIdData.price) {
+      this.deleteImagesById(dish.id);
+    }
+    return new DishCreateResponceDTO(dish);
+  }
+  async deleteDish(id: number) {
+    await this.deleteImagesById(id);
+    await this.prismaService.dish.delete({
+      where: {
+        id,
+      },
+    });
   }
   private async imagesIsValidAndExist(images: imageType[]) {
     const validRes = {
@@ -94,18 +121,33 @@ export class DishService {
     for (let i = 0; i < images.length; i++) {
       const uploadIndex = images[i].url.indexOf('/uploads');
       if (uploadIndex === -1) {
-        validRes.isValid = false;
-        break;
+        throw new BadRequestException('Images are not valid or exists');
       }
       const imgPath = images[i].url.substring(uploadIndex);
       const imgRes = await this.imagesService.checkIsExist(imgPath);
       if (!imgRes.found) {
-        validRes.isValid = false;
-        break;
+        throw new BadRequestException('Images are not valid or exists');
       }
       validRes.validsImgs.push({ url: `images${imgPath}` });
     }
-    console.log(validRes.validsImgs);
     return validRes;
+  }
+  private async createImages(validsImgs: ValidsImg[], id: number) {
+    const dishImages = validsImgs.map((image) => {
+      return {
+        ...image,
+        dishId: id,
+      };
+    });
+    await this.prismaService.image.createMany({
+      data: dishImages,
+    });
+  }
+  private async deleteImagesById(id: number) {
+    await this.prismaService.image.deleteMany({
+      where: {
+        dishId: id,
+      },
+    });
   }
 }
