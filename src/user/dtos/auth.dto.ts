@@ -5,6 +5,8 @@ import {
   IsEmail,
   Length,
 } from 'class-validator';
+import { Bucket, UserType } from '@prisma/client';
+import { Exclude } from 'class-transformer';
 
 export class SighUpDTO {
   @IsString()
@@ -28,4 +30,24 @@ export class SignInDTO {
   @IsNotEmpty()
   @Length(8, 20)
   password: string;
+}
+
+export class UserResponceDTO {
+  id: number;
+  name: string;
+  phone: string;
+  type: UserType;
+  bucket: Bucket[];
+  token: string;
+  @Exclude()
+  userSalt: string;
+  @Exclude()
+  password: string;
+  @Exclude()
+  createdAt: Date;
+  @Exclude()
+  updateAt: Date;
+  constructor(partiall: Partial<UserResponceDTO>) {
+    Object.assign(this, partiall);
+  }
 }

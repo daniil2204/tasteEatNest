@@ -2,6 +2,7 @@ import { Injectable, ConflictException, HttpException } from '@nestjs/common';
 import { UserType } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { userRegisterInterface, userSighInInterface } from 'types/user';
+import { UserResponceDTO } from '../dtos/auth.dto';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
@@ -24,8 +25,18 @@ export class AuthService {
         type: UserType.BUYER,
         userSalt,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        bucket: true,
+      },
     });
-    return this.generateJWT(user.name, user.id);
+    return new UserResponceDTO({
+      ...user,
+      token: await this.generateJWT(user.name, user.id),
+    });
   }
   async signIn({ email, password }: userSighInInterface) {
     const user = await this.findUserByEmail(email);
@@ -37,28 +48,45 @@ export class AuthService {
     if (!isValidPassword) {
       throw new HttpException('Invalid password or email', 400);
     }
-    return this.generateJWT(user.name, user.id);
+    return new UserResponceDTO({
+      ...user,
+      token: await this.generateJWT(user.name, user.id),
+    });
   }
   async getMe(id: number) {
-    return this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findUnique({
       where: {
         id,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        bucket: true,
+      },
     });
+    return new UserResponceDTO(user);
   }
   private async findUserByEmail(email: string) {
     const user = await this.prismaService.user.findUnique({
       where: {
         email,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        bucket: true,
+        password: true,
+      },
     });
     return user;
   }
   private async generateJWT(name: string, id: number) {
-    return {
-      token: jwt.sign({ name, id }, process.env.JWT_SECRET_KEY, {
-        expiresIn: 360000,
-      }),
-    };
+    return jwt.sign({ name, id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: 360000,
+    });
   }
 }

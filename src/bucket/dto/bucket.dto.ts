@@ -1,14 +1,5 @@
 import { Exclude, Type } from 'class-transformer';
-import {
-  IsArray,
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsPositive,
-  IsNotEmpty,
-  ValidateNested,
-  IsOptional,
-} from 'class-validator';
+import { IsNumber, IsPositive } from 'class-validator';
 
 export class AddItemToBucketRequestDTO {
   @IsNumber()
