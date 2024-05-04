@@ -43,16 +43,17 @@ enum DishType {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  phone     String
-  userSalt  String
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
-  type      UserType
-  bucket    Bucket[]
+  id          Int           @id @default(autoincrement())
+  name        String
+  email       String        @unique
+  password    String
+  phone       String
+  userSalt    String
+  createdAt   DateTime      @default(now())
+  updateAt    DateTime      @updatedAt
+  type        UserType
+  bucket      Bucket[]
+  Reservation Reservation[]
 }
 
 enum UserType {
@@ -69,4 +70,20 @@ model Bucket {
   dishId Int
   count  Int
   price  Int
+}
+
+model Table {
+  id            Int           @id @default(autoincrement())
+  countOfQuests Int
+  Reservation   Reservation[]
+}
+
+model Reservation {
+  id        Int    @id @default(autoincrement())
+  table     Table  @relation(fields: [tableId], references: [id])
+  tableId   Int
+  bookHours Int
+  user      User   @relation(fields: [userId], references: [id])
+  userId    Int
+  date      String
 }

@@ -21,7 +21,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 export class DishController {
   constructor(private readonly dishService: DishService) {}
   @Get()
-  getDishes(
+  async getDishes(
     @Query('offset') offset?: number,
     @Query('likes', new ParseBoolPipe({ optional: true })) likes?: boolean,
     @Query('discount', new ParseBoolPipe({ optional: true }))
@@ -43,17 +43,17 @@ export class DishController {
     });
   }
   @Get('/:id')
-  getDishById(@Param('id', ParseIntPipe) id: number) {
+  async getDishById(@Param('id', ParseIntPipe) id: number) {
     return this.dishService.getDishById(id);
   }
   @Roles(UserType.ADMIN)
   @Post()
-  createDish(@Body() createDishData: DishCreateRequestDTO) {
+  async createDish(@Body() createDishData: DishCreateRequestDTO) {
     return this.dishService.createDish(createDishData);
   }
   @Roles(UserType.ADMIN)
   @Put('/:id')
-  updateDishById(
+  async updateDishById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDishByIdData: DishUpdateRequestDTO,
   ) {
@@ -61,7 +61,7 @@ export class DishController {
   }
   @Roles(UserType.ADMIN)
   @Delete('/:id')
-  deleteDishById(@Param('id', ParseIntPipe) id: number) {
+  async deleteDishById(@Param('id', ParseIntPipe) id: number) {
     this.dishService.deleteDish(id);
   }
 }

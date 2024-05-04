@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DishController } from './dish/dish.controller';
@@ -11,9 +11,18 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { UserInterceptor } from './user/interceptor/user.interceptor';
 import { AuthGuard } from './guards/auth.guard';
 import { BucketModule } from './bucket/bucket.module';
+import { ReservationModule } from './reservation/reservation.module';
+import { ReservationService } from './reservation/reservation.service';
 
 @Module({
-  imports: [DishModule, PrismaModule, ImagesModule, UserModule, BucketModule],
+  imports: [
+    DishModule,
+    PrismaModule,
+    ImagesModule,
+    UserModule,
+    BucketModule,
+    ReservationModule,
+  ],
   controllers: [AppController, DishController],
   providers: [
     AppService,
@@ -28,4 +37,11 @@ import { BucketModule } from './bucket/bucket.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private reservationService: ReservationService) {}
+
+  async onModuleInit() {
+    // Здесь вы можете выполнить вашу функцию
+    this.reservationService.();
+  }
+}
