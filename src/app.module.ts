@@ -37,11 +37,10 @@ import { ReservationService } from './reservation/reservation.service';
     },
   ],
 })
-export class AppModule implements OnModuleInit {
-  constructor(private reservationService: ReservationService) {}
-
-  async onModuleInit() {
-    // Здесь вы можете выполнить вашу функцию
-    this.reservationService.();
-  }
+export class AppModule {
+  // implements OnModuleInit constructor(private reservationService: ReservationService) {}
+  // async onModuleInit() {
+  //   // Здесь вы можете выполнить вашу функцию
+  //   this.reservationService.();
+  // }
 }

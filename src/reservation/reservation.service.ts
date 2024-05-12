@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { IReservation } from 'types/reservation';
 
 @Injectable()
 export class ReservationService {
@@ -13,6 +14,7 @@ export class ReservationService {
         tableId: true,
       },
     });
+    console.log(reservations);
     const reservationIds = reservations.map(
       (reservation) => reservation.tableId,
     );
@@ -39,5 +41,23 @@ export class ReservationService {
     // });
     // const availableTables = tables.filter(item => );
   }
-  async createReservationTable() {}
+  async createReservationTable(userId: number, reservationBody: IReservation) {
+    console.log(userId);
+    console.log(reservationBody);
+    const table = await this.prismaService.table.findUnique({
+      where: {
+        id: reservationBody.tableId,
+      },
+    });
+    console.log(table);
+    const reservation = await this.prismaService.reservation.create({
+      data: {
+        bookHours: reservationBody.bookHours,
+        tableId: table.id,
+        userId: userId,
+        date: reservationBody.date,
+      },
+    });
+    console.log(reservation);
+  }
 }

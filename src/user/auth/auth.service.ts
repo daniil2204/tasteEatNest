@@ -31,6 +31,7 @@ export class AuthService {
         email: true,
         phone: true,
         bucket: true,
+        reservation: true,
       },
     });
     return new UserResponceDTO({
