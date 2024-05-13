@@ -76,7 +76,6 @@ export class ReservationService {
     ).getTime();
     const isValid =
       reservationDate >= todayDate && reservationDate <= futureDate;
-    console.log(isValid);
     return isValid;
   }
 }

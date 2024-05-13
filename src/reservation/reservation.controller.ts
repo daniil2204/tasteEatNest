@@ -23,9 +23,7 @@ export class ReservationController {
     @Query('count') count: number,
   ) {
     const date = { day, month, year };
-    console.log(await this.reservationService.isValidDate(date));
     if (await this.reservationService.isValidDate(date)) {
-      console.log(date);
       return this.reservationService.getReservationByDateAndCount(count, date);
     } else {
       throw new BadRequestException('The time has an invalid format');
@@ -37,9 +35,19 @@ export class ReservationController {
     @Body() createReservation: ReservationCreateRequestDTO,
   ) {
     const userId = user.id;
-    return this.reservationService.createReservationTable(
-      userId,
-      createReservation,
-    );
+    if (
+      await this.reservationService.isValidDate({
+        day: createReservation.day,
+        month: createReservation.month,
+        year: createReservation.year,
+      })
+    ) {
+      return this.reservationService.createReservationTable(
+        userId,
+        createReservation,
+      );
+    } else {
+      throw new BadRequestException('The time has an invalid format');
+    }
   }
 }
