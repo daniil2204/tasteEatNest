@@ -63,13 +63,15 @@ model Table {
 }
 
 model Reservation {
-  id        Int    @id @default(autoincrement())
+  id        Int   @id @default(autoincrement())
   tableId   Int
   bookHours Int
   userId    Int
-  date      String
-  table     Table  @relation(fields: [tableId], references: [id])
-  user      User   @relation(fields: [userId], references: [id])
+  day       Int
+  month     Int
+  year      Int
+  table     Table @relation(fields: [tableId], references: [id])
+  user      User  @relation(fields: [userId], references: [id])
 }
 
 enum DishType {

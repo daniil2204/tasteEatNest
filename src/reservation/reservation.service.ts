@@ -1,20 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { IReservation } from 'types/reservation';
+import { DateReservationType, IReservation } from 'types/reservation';
+import { ReservationCreateResponceDTO } from './dto/reservation.dto';
 
 @Injectable()
 export class ReservationService {
   constructor(private readonly prismaService: PrismaService) {}
-  async getReservationByDateAndCount(count: number, userDate: string) {
+  async getReservationByDateAndCount(count: number, date: DateReservationType) {
     const reservations = await this.prismaService.reservation.findMany({
       where: {
-        date: userDate,
+        day: date.day,
+        month: date.month,
+        year: date.year,
       },
       select: {
         tableId: true,
       },
     });
-    console.log(reservations);
     const reservationIds = reservations.map(
       (reservation) => reservation.tableId,
     );
@@ -29,35 +31,52 @@ export class ReservationService {
       },
     });
     return tables;
-    // const tables = await this.prismaService.table.findMany({
-    //   where: {
-    //     countOfQuests: count,
-    //   },
-    //   select: {
-    //     countOfQuests: true,
-    //     id: true,
-    //     Reservation: true,
-    //   },
-    // });
-    // const availableTables = tables.filter(item => );
   }
   async createReservationTable(userId: number, reservationBody: IReservation) {
-    console.log(userId);
-    console.log(reservationBody);
-    const table = await this.prismaService.table.findUnique({
+    const resevationCheck = await this.prismaService.reservation.findFirst({
       where: {
-        id: reservationBody.tableId,
+        day: reservationBody.day,
+        month: reservationBody.month,
+        year: reservationBody.year,
+        tableId: reservationBody.tableId,
       },
     });
-    console.log(table);
-    const reservation = await this.prismaService.reservation.create({
-      data: {
-        bookHours: reservationBody.bookHours,
-        tableId: table.id,
-        userId: userId,
-        date: reservationBody.date,
-      },
-    });
-    console.log(reservation);
+    if (!resevationCheck) {
+      try {
+        const table = await this.prismaService.table.findUnique({
+          where: {
+            id: reservationBody.tableId,
+          },
+        });
+        const reservation = await this.prismaService.reservation.create({
+          data: {
+            bookHours: reservationBody.bookHours,
+            tableId: table.id,
+            userId: userId,
+            day: reservationBody.day,
+            month: reservationBody.month,
+            year: reservationBody.year,
+          },
+        });
+        return new ReservationCreateResponceDTO(reservation);
+      } catch {
+        throw new BadRequestException();
+      }
+    } else {
+      throw new BadRequestException('Reservation is already existed');
+    }
+  }
+  async isValidDate(date: DateReservationType) {
+    const todayDate = new Date().getTime();
+    const futureDate = new Date().setDate(new Date().getDate() + 14);
+    const reservationDate = new Date(
+      date.year,
+      date.month - 1,
+      date.day,
+    ).getTime();
+    const isValid =
+      reservationDate >= todayDate && reservationDate <= futureDate;
+    console.log(isValid);
+    return isValid;
   }
 }

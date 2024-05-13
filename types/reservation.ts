@@ -1,5 +1,9 @@
 export interface IReservation {
   tableId: number;
   bookHours: number;
-  date: string;
+  day: number;
+  year: number;
+  month: number;
 }
+
+export type DateReservationType = Omit<IReservation, 'tableId' | 'bookHours'>;
