@@ -13,6 +13,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { BucketModule } from './bucket/bucket.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { ReservationService } from './reservation/reservation.service';
+import { TablesModule } from './tables/tables.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ReservationService } from './reservation/reservation.service';
     UserModule,
     BucketModule,
     ReservationModule,
+    TablesModule,
   ],
   controllers: [AppController, DishController],
   providers: [
