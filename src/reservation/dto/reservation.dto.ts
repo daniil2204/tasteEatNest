@@ -1,16 +1,4 @@
-import { Exclude, Type } from 'class-transformer';
-import {
-  IsArray,
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsPositive,
-  IsNotEmpty,
-  ValidateNested,
-  IsOptional,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsNumber, IsPositive, Max, Min } from 'class-validator';
 
 export class ReservationCreateRequestDTO {
   @Max(31)
@@ -27,7 +15,14 @@ export class ReservationCreateRequestDTO {
   year: number;
   @IsNumber()
   @IsPositive()
-  bookHours: number;
+  @Max(22)
+  @Min(8)
+  bookHour: number;
+  @IsNumber()
+  @IsPositive()
+  @Max(3)
+  @Min(1)
+  hourCount: number;
   @IsNumber()
   @IsPositive()
   tableId: number;

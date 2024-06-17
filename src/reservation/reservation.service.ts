@@ -2,6 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { DateReservationType, IReservation } from 'types/reservation';
 import { ReservationCreateResponceDTO } from './dto/reservation.dto';
+import { tableAndFreeTime } from 'types/table';
+import { workHours } from 'src/utils/additionalInfo';
 
 @Injectable()
 export class ReservationService {
@@ -15,22 +17,32 @@ export class ReservationService {
       },
       select: {
         tableId: true,
+        bookHour: true,
+        hourCount: true,
       },
     });
-    const reservationIds = reservations.map(
-      (reservation) => reservation.tableId,
-    );
     const tables = await this.prismaService.table.findMany({
       where: {
-        countOfQuests: count,
-        NOT: {
-          id: {
-            in: reservationIds,
-          },
-        },
+        countOfGuests: count,
       },
     });
-    return tables;
+    const tablesAndFreeTime: tableAndFreeTime[] = tables.reduce((acc, item) => {
+      const tableAndFTime = { table: item, freeHours: [] };
+      const reservedTable = reservations.find(
+        (reservation) => reservation.tableId === item.id,
+      );
+      if (reservedTable) {
+        tableAndFTime.freeHours = this.getFreeBookHours({
+          bookHour: reservedTable.bookHour,
+          hourCount: reservedTable.hourCount,
+        });
+      } else {
+        tableAndFTime.freeHours = workHours;
+      }
+      acc.push(tableAndFTime);
+      return acc;
+    }, []);
+    return tablesAndFreeTime;
   }
   async createReservationTable(userId: number, reservationBody: IReservation) {
     const resevationCheck = await this.prismaService.reservation.findFirst({
@@ -50,7 +62,8 @@ export class ReservationService {
         });
         const reservation = await this.prismaService.reservation.create({
           data: {
-            bookHours: reservationBody.bookHours,
+            bookHour: reservationBody.bookHour,
+            hourCount: reservationBody.hourCount,
             tableId: table.id,
             userId: userId,
             day: reservationBody.day,
@@ -77,5 +90,18 @@ export class ReservationService {
     const isValid =
       reservationDate >= todayDate && reservationDate <= futureDate;
     return isValid;
+  }
+  getFreeBookHours({
+    bookHour,
+    hourCount,
+  }: {
+    bookHour: number;
+    hourCount: number;
+  }) {
+    const bookedHours = [];
+    for (let i = 0; i < hourCount; i++) {
+      bookedHours.push(bookHour + i);
+    }
+    return workHours.filter((item) => !bookedHours.includes(item));
   }
 }

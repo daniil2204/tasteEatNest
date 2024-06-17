@@ -12,7 +12,7 @@ export class TablesService {
   async getTablesByCount(countOfGuests: number) {
     const tables = await this.prismaService.table.findMany({
       where: {
-        countOfQuests: countOfGuests,
+        countOfGuests: countOfGuests,
       },
     });
     return tables;
@@ -20,7 +20,7 @@ export class TablesService {
   async createTable(tableData: ITable) {
     const table = await this.prismaService.table.create({
       data: {
-        countOfQuests: tableData.countOfGuests,
+        countOfGuests: tableData.countOfGuests,
       },
     });
     return table;
@@ -31,7 +31,7 @@ export class TablesService {
         id: tableId,
       },
       data: {
-        countOfQuests: tableData.countOfGuests,
+        countOfGuests: tableData.countOfGuests,
       },
     });
     return table;

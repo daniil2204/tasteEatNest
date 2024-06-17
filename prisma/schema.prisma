@@ -58,14 +58,15 @@ model Bucket {
 
 model Table {
   id            Int           @id @default(autoincrement())
-  countOfQuests Int
+  countOfGuests Int           @default(0)
   Reservation   Reservation[]
 }
 
 model Reservation {
   id        Int   @id @default(autoincrement())
   tableId   Int
-  bookHours Int
+  bookHour  Int
+  hourCount Int
   userId    Int
   day       Int
   month     Int
