@@ -104,4 +104,17 @@ export class ReservationService {
     }
     return workHours.filter((item) => !bookedHours.includes(item));
   }
+  async getReservationById(userId: number, reservationId: number) {
+    const reservation = await this.prismaService.reservation.findUnique({
+      where: {
+        userId: userId,
+        id: reservationId,
+      },
+    });
+    if (reservation) {
+      return reservation;
+    } else {
+      throw new BadRequestException('Reservation is not founded');
+    }
+  }
 }

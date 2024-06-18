@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Param,
   ParseIntPipe,
   Post,
   Query,
@@ -36,11 +37,12 @@ export class ReservationController {
   ) {
     const userId = user.id;
     if (
-      await this.reservationService.isValidDate({
+      (await this.reservationService.isValidDate({
         day: createReservation.day,
         month: createReservation.month,
         year: createReservation.year,
-      })
+      })) &&
+      userId
     ) {
       return this.reservationService.createReservationTable(
         userId,
@@ -48,6 +50,18 @@ export class ReservationController {
       );
     } else {
       throw new BadRequestException('The time has an invalid format');
+    }
+  }
+  @Get('/:reservationId')
+  async getReservationById(
+    @User() user: UserInterceptorType,
+    @Param('reservationId', ParseIntPipe) reservationId: number,
+  ) {
+    const userId = user.id;
+    if (userId && reservationId) {
+      return this.reservationService.getReservationById(userId, reservationId);
+    } else {
+      throw new BadRequestException('Reservation is not founded');
     }
   }
 }
