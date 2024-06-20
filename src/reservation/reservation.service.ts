@@ -50,6 +50,8 @@ export class ReservationService {
         day: reservationBody.day,
         month: reservationBody.month,
         year: reservationBody.year,
+        bookHour: reservationBody.bookHour,
+        hourCount: reservationBody.hourCount,
         tableId: reservationBody.tableId,
       },
     });
@@ -71,6 +73,7 @@ export class ReservationService {
             year: reservationBody.year,
           },
         });
+        console.log(reservation);
         return new ReservationCreateResponceDTO(reservation);
       } catch {
         throw new BadRequestException();
@@ -116,5 +119,16 @@ export class ReservationService {
     } else {
       throw new BadRequestException('Reservation is not founded');
     }
+  }
+  async getUserReservation(userId: number) {
+    const reservations = this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        reservation: true,
+      },
+    });
+    return reservations;
   }
 }

@@ -30,7 +30,7 @@ export class ReservationController {
       throw new BadRequestException('The time has an invalid format');
     }
   }
-  @Post('create')
+  @Post('/create')
   async createReservation(
     @User() user: UserInterceptorType,
     @Body() createReservation: ReservationCreateRequestDTO,
@@ -50,6 +50,15 @@ export class ReservationController {
       );
     } else {
       throw new BadRequestException('The time has an invalid format');
+    }
+  }
+  @Get('/userReservations')
+  async getUserReservation(@User() user: UserInterceptorType) {
+    const userId = user.id;
+    if (userId) {
+      return this.reservationService.getUserReservation(userId);
+    } else {
+      throw new BadRequestException('The invalid request');
     }
   }
   @Get('/:reservationId')

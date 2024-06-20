@@ -9,10 +9,7 @@ import {
 import { User } from 'src/user/decorators/user.decorator';
 import { UserInterceptorType } from 'types/user';
 import { BucketService } from './bucket.service';
-import {
-  AddItemToBucketRequestDTO,
-  ChangeBucketCountRequestDTO,
-} from './dto/bucket.dto';
+import { AddItemToBucketRequestDTO } from './dto/bucket.dto';
 
 @Controller('bucket')
 export class BucketController {
@@ -25,21 +22,22 @@ export class BucketController {
     return this.bucketService.addItemToBucket(
       user.id,
       addItemToBucketInfo.dishId,
+      addItemToBucketInfo.count,
     );
   }
-  @Post('/changeCount/:id')
-  async changeBucketCount(
-    @Param('id', ParseIntPipe) userId: number,
-    @Body() changeBucketCountInfo: ChangeBucketCountRequestDTO,
-  ) {
-    const { bucketId, count, dishId } = changeBucketCountInfo;
-    return this.bucketService.changeItemCount({
-      bucketId,
-      count,
-      dishId,
-      userId,
-    });
-  }
+  // @Post('/changeCount/:id')
+  // async changeBucketCount(
+  //   @Param('id', ParseIntPipe) userId: number,
+  //   @Body() changeBucketCountInfo: ChangeBucketCountRequestDTO,
+  // ) {
+  //   const { bucketId, count, dishId } = changeBucketCountInfo;
+  //   return this.bucketService.changeItemCount({
+  //     bucketId,
+  //     count,
+  //     dishId,
+  //     userId,
+  //   });
+  // }
   @Delete('/:id')
   async deleteItemFromBucket(
     @Param('id', ParseIntPipe) id: number,

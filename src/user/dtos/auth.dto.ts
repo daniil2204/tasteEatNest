@@ -5,7 +5,7 @@ import {
   IsEmail,
   Length,
 } from 'class-validator';
-import { Bucket, UserType } from '@prisma/client';
+import { UserType } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class SighUpDTO {
@@ -13,7 +13,7 @@ export class SighUpDTO {
   @IsNotEmpty()
   name: string;
   @Matches(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/, {
-    message: 'Phone is not valid',
+    message: 'phone is not valid',
   })
   phone: string;
   @IsEmail()
@@ -37,7 +37,6 @@ export class UserResponceDTO {
   name: string;
   phone: string;
   type: UserType;
-  bucket: Bucket[];
   token: string;
   @Exclude()
   userSalt: string;

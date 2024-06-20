@@ -1,10 +1,12 @@
-import { Exclude, Type } from 'class-transformer';
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsInt, IsNumber, IsPositive, Min } from 'class-validator';
 
 export class AddItemToBucketRequestDTO {
   @IsNumber()
   @IsPositive()
   dishId: number;
+  @IsInt()
+  @Min(0)
+  count: number;
 }
 
 export class ChangeBucketCountRequestDTO {

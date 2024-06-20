@@ -65,6 +65,7 @@ export class AuthService {
         email: true,
         phone: true,
         bucket: true,
+        reservation: true,
       },
     });
     return new UserResponceDTO(user);
@@ -81,6 +82,7 @@ export class AuthService {
         phone: true,
         bucket: true,
         password: true,
+        reservation: true,
       },
     });
     return user;

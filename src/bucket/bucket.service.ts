@@ -5,8 +5,7 @@ import { changeCountInterface } from 'types/bucket';
 @Injectable()
 export class BucketService {
   constructor(private readonly prismaService: PrismaService) {}
-  async addItemToBucket(userId: number, dishId: number) {
-    let errorMsg = 'Dish did not found';
+  async addItemToBucket(userId: number, dishId: number, count: number) {
     try {
       const dish = await this.prismaService.dish.findFirst({
         where: {
@@ -17,28 +16,34 @@ export class BucketService {
           bucket: true,
         },
       });
-      if (
-        dish.bucket.find(
-          (item) => item.dishId === dishId && item.userId === userId,
-        )
-      ) {
-        errorMsg = 'is existed';
-        throw new Error();
+      const bucketByUser = dish.bucket.find(
+        (item) => item.userId === userId && item.dishId === dishId,
+      );
+      console.log(bucketByUser);
+      if (bucketByUser) {
+        return this.changeItemCount({
+          bucketId: bucketByUser.id,
+          count: count,
+          userId: userId,
+          dishId: dishId,
+        });
+      } else {
+        const bucket = await this.prismaService.bucket.create({
+          data: {
+            count: count,
+            price: dish.price,
+            dishId: dishId,
+            userId: userId,
+          },
+        });
+        return bucket;
       }
-      const bucket = await this.prismaService.bucket.create({
-        data: {
-          count: 1,
-          price: dish.price,
-          dishId,
-          userId,
-        },
-      });
-      return bucket;
     } catch (err) {
-      throw new BadRequestException(errorMsg);
+      throw new BadRequestException();
     }
   }
-  async changeItemCount({
+
+  private async changeItemCount({
     dishId,
     count,
     bucketId,
@@ -46,21 +51,22 @@ export class BucketService {
   }: changeCountInterface) {
     try {
       if (count === 0) {
-        this.deleteItemFromBucket(bucketId, userId);
+        return this.deleteItemFromBucket(bucketId, userId);
+      } else {
+        const priceByCount = await this.calculatePrice(dishId, count);
+        const bucket = await this.prismaService.bucket.update({
+          where: {
+            id: bucketId,
+            userId,
+            dishId,
+          },
+          data: {
+            price: priceByCount,
+            count,
+          },
+        });
+        return bucket;
       }
-      const priceByCount = await this.calculatePrice(dishId, count);
-      const bucket = await this.prismaService.bucket.update({
-        where: {
-          id: bucketId,
-          userId,
-          dishId,
-        },
-        data: {
-          price: priceByCount,
-          count,
-        },
-      });
-      return bucket;
     } catch (err) {
       throw new BadRequestException();
     }
@@ -73,7 +79,9 @@ export class BucketService {
           userId,
         },
       });
-    } catch (err) {}
+    } catch (err) {
+      throw new BadRequestException();
+    }
   }
   private async calculatePrice(dishId: number, count: number): Promise<number> {
     const priceForItem = await this.prismaService.dish.findUnique({
