@@ -19,7 +19,6 @@ export class BucketService {
       const bucketByUser = dish.bucket.find(
         (item) => item.userId === userId && item.dishId === dishId,
       );
-      console.log(bucketByUser);
       if (bucketByUser) {
         return this.changeItemCount({
           bucketId: bucketByUser.id,
@@ -31,7 +30,7 @@ export class BucketService {
         const bucket = await this.prismaService.bucket.create({
           data: {
             count: count,
-            price: dish.price,
+            price: dish.price * count,
             dishId: dishId,
             userId: userId,
           },
@@ -93,5 +92,22 @@ export class BucketService {
       },
     });
     return priceForItem.price * count;
+  }
+  async getBucketByDishIdAndUserId(userId: number, dishId: number) {
+    const bucket = await this.prismaService.bucket.findFirst({
+      where: {
+        dishId: dishId,
+        userId: userId,
+      },
+    });
+    return bucket;
+  }
+  async getBucketByUserId(userId: number) {
+    const bucket = await this.prismaService.bucket.findMany({
+      where: {
+        userId: userId,
+      },
+    });
+    return bucket;
   }
 }
