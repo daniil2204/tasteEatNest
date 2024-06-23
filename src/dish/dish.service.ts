@@ -51,11 +51,11 @@ export class DishService {
         ...dish,
         ...(type || discount
           ? {
-              image: `${process.env.DOMAIN}${dish.images[0].url}`,
+              image: this.makeValidLink(dish.images[0].url),
             }
           : {
               images: dish.images.map((img) => ({
-                url: `${process.env.DOMAIN}${img.url}`,
+                url: this.makeValidLink(img.url),
               })),
             }),
       };
@@ -69,6 +69,25 @@ export class DishService {
       where: {
         id,
       },
+      select: {
+        id: true,
+        description: true,
+        ingredients: true,
+        discount: true,
+        price: true,
+        title: true,
+        type: true,
+        weight: true,
+        images: {
+          select: {
+            url: true,
+          },
+        },
+      },
+    });
+    dish.images = dish.images.map((img) => {
+      img.url = this.makeValidLink(img.url);
+      return img;
     });
     return new DishCreateResponceDTO(dish);
   }
@@ -149,5 +168,8 @@ export class DishService {
         dishId: id,
       },
     });
+  }
+  private makeValidLink(link: string) {
+    return `${process.env.DOMAIN}${link}`;
   }
 }
