@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DishController } from './dish/dish.controller';
@@ -12,7 +12,6 @@ import { UserInterceptor } from './user/interceptor/user.interceptor';
 import { AuthGuard } from './guards/auth.guard';
 import { BucketModule } from './bucket/bucket.module';
 import { ReservationModule } from './reservation/reservation.module';
-import { ReservationService } from './reservation/reservation.service';
 import { TablesModule } from './tables/tables.module';
 
 @Module({

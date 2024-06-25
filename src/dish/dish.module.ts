@@ -15,5 +15,6 @@ import { ImagesModule } from 'src/images/images.module';
       useClass: ClassSerializerInterceptor,
     },
   ],
+  exports: [DishService],
 })
 export class DishModule {}

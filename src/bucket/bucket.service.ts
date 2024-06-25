@@ -1,10 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Bucket } from '@prisma/client';
+import { DishService } from 'src/dish/dish.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { changeCountInterface } from 'types/bucket';
 
 @Injectable()
 export class BucketService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly dishService: DishService,
+  ) {}
   async addItemToBucket(userId: number, dishId: number, count: number) {
     try {
       const dish = await this.prismaService.dish.findFirst({
@@ -103,11 +108,31 @@ export class BucketService {
     return bucket;
   }
   async getBucketByUserId(userId: number) {
-    const bucket = await this.prismaService.bucket.findMany({
-      where: {
-        userId: userId,
-      },
-    });
-    return bucket;
+    try {
+      const bucket = await this.prismaService.bucket.findMany({
+        where: {
+          userId: userId,
+        },
+      });
+      return this.getDishesWithTitleAndImage(bucket);
+    } catch (err) {
+      throw new BadRequestException('Error');
+    }
+  }
+  async getDishesWithTitleAndImage(bucket: Bucket[]) {
+    const newBucket = [];
+    for (let i = 0; i < bucket.length; i++) {
+      const { title, images, price, discount } =
+        await this.dishService.getDishById(bucket[i].dishId);
+      const bucketWithDish = {
+        ...bucket[i],
+        title,
+        image: images[0].url,
+        price,
+        discount,
+      };
+      newBucket.push(bucketWithDish);
+    }
+    return newBucket;
   }
 }

@@ -73,7 +73,6 @@ export class ReservationService {
             year: reservationBody.year,
           },
         });
-        console.log(reservation);
         return new ReservationCreateResponceDTO(reservation);
       } catch {
         throw new BadRequestException();
