@@ -8,7 +8,7 @@ export class ImagesService {
   getUrls(files: Express.Multer.File[]) {
     const urls = files.map(
       (file) =>
-        `${process.env.DOMAIN}/images/uploads/dishes/${file.originalname}`,
+        `${process.env.DOMAIN}images/uploads/dishes/${file.originalname}`,
     );
     return urls;
   }
