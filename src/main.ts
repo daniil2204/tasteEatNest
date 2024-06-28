@@ -15,7 +15,7 @@ async function bootstrap() {
   );
   app.enableCors({
     credentials: true,
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://taste-eat-next.vercel.app'],
   });
   await app.listen(4000);
 }
