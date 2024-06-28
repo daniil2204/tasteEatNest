@@ -14,12 +14,8 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
+    origin: true,
     credentials: true,
-    origin: [
-      'http://localhost:3000',
-      'https://taste-eat-next-42fwfw3gf-daniil2204s-projects.vercel.app/',
-      'https://taste-eat-next.vercel.app/',
-    ],
   });
   await app.listen(4000);
 }
